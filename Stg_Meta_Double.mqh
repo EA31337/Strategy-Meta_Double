@@ -1,75 +1,74 @@
 /**
  * @file
- * Implements Reversal meta strategy.
+ * Implements Double meta strategy.
  */
 
 // Prevents processing this includes file multiple times.
-#ifndef STG_META_REVERSAL_MQH
-#define STG_META_REVERSAL_MQH
+#ifndef STG_META_DOUBLE_MQH
+#define STG_META_DOUBLE_MQH
 
 // User input params.
-INPUT2_GROUP("Meta Reversal strategy: main params");
-INPUT2 ENUM_STRATEGY Meta_Reversal_Strategy = STRAT_ATR;  // Strategy to reverse signals
-INPUT2_GROUP("Meta Reversal strategy: common params");
-INPUT2 float Meta_Reversal_LotSize = 0;                // Lot size
-INPUT2 int Meta_Reversal_SignalOpenMethod = 0;         // Signal open method
-INPUT2 float Meta_Reversal_SignalOpenLevel = 0;        // Signal open level
-INPUT2 int Meta_Reversal_SignalOpenFilterMethod = 32;  // Signal open filter method
-INPUT2 int Meta_Reversal_SignalOpenFilterTime = 3;     // Signal open filter time (0-31)
-INPUT2 int Meta_Reversal_SignalOpenBoostMethod = 0;    // Signal open boost method
-INPUT2 int Meta_Reversal_SignalCloseMethod = 0;        // Signal close method
-INPUT2 int Meta_Reversal_SignalCloseFilter = 32;       // Signal close filter (-127-127)
-INPUT2 float Meta_Reversal_SignalCloseLevel = 0;       // Signal close level
-INPUT2 int Meta_Reversal_PriceStopMethod = 0;          // Price limit method
-INPUT2 float Meta_Reversal_PriceStopLevel = 2;         // Price limit level
-INPUT2 int Meta_Reversal_TickFilterMethod = 32;        // Tick filter method (0-255)
-INPUT2 float Meta_Reversal_MaxSpread = 4.0;            // Max spread to trade (in pips)
-INPUT2 short Meta_Reversal_Shift = 0;                  // Shift
-INPUT2 float Meta_Reversal_OrderCloseLoss = 30;        // Order close loss
-INPUT2 float Meta_Reversal_OrderCloseProfit = 30;      // Order close profit
-INPUT2 int Meta_Reversal_OrderCloseTime = -10;         // Order close time in mins (>0) or bars (<0)
+INPUT2_GROUP("Meta Double strategy: main params");
+INPUT2 ENUM_STRATEGY Meta_Double_Strategy = STRAT_ATR;  // Strategy
+INPUT2_GROUP("Meta Double strategy: common params");
+INPUT2 float Meta_Double_LotSize = 0;                // Lot size
+INPUT2 int Meta_Double_SignalOpenMethod = 0;         // Signal open method
+INPUT2 float Meta_Double_SignalOpenLevel = 0;        // Signal open level
+INPUT2 int Meta_Double_SignalOpenFilterMethod = 32;  // Signal open filter method
+INPUT2 int Meta_Double_SignalOpenFilterTime = 3;     // Signal open filter time (0-31)
+INPUT2 int Meta_Double_SignalOpenBoostMethod = 0;    // Signal open boost method
+INPUT2 int Meta_Double_SignalCloseMethod = 0;        // Signal close method
+INPUT2 int Meta_Double_SignalCloseFilter = 32;       // Signal close filter (-127-127)
+INPUT2 float Meta_Double_SignalCloseLevel = 0;       // Signal close level
+INPUT2 int Meta_Double_PriceStopMethod = 0;          // Price limit method
+INPUT2 float Meta_Double_PriceStopLevel = 2;         // Price limit level
+INPUT2 int Meta_Double_TickFilterMethod = 32;        // Tick filter method (0-255)
+INPUT2 float Meta_Double_MaxSpread = 4.0;            // Max spread to trade (in pips)
+INPUT2 short Meta_Double_Shift = 0;                  // Shift
+INPUT2 float Meta_Double_OrderCloseLoss = 30;        // Order close loss
+INPUT2 float Meta_Double_OrderCloseProfit = 30;      // Order close profit
+INPUT2 int Meta_Double_OrderCloseTime = -10;         // Order close time in mins (>0) or bars (<0)
 
 // Structs.
 
 // Defines struct with default user strategy values.
-struct Stg_Meta_Reversal_Params_Defaults : StgParams {
-  Stg_Meta_Reversal_Params_Defaults()
-      : StgParams(::Meta_Reversal_SignalOpenMethod, ::Meta_Reversal_SignalOpenFilterMethod,
-                  ::Meta_Reversal_SignalOpenLevel, ::Meta_Reversal_SignalOpenBoostMethod,
-                  ::Meta_Reversal_SignalCloseMethod, ::Meta_Reversal_SignalCloseFilter,
-                  ::Meta_Reversal_SignalCloseLevel, ::Meta_Reversal_PriceStopMethod, ::Meta_Reversal_PriceStopLevel,
-                  ::Meta_Reversal_TickFilterMethod, ::Meta_Reversal_MaxSpread, ::Meta_Reversal_Shift) {
-    Set(STRAT_PARAM_LS, Meta_Reversal_LotSize);
-    Set(STRAT_PARAM_OCL, Meta_Reversal_OrderCloseLoss);
-    Set(STRAT_PARAM_OCP, Meta_Reversal_OrderCloseProfit);
-    Set(STRAT_PARAM_OCT, Meta_Reversal_OrderCloseTime);
-    Set(STRAT_PARAM_SOFT, Meta_Reversal_SignalOpenFilterTime);
+struct Stg_Meta_Double_Params_Defaults : StgParams {
+  Stg_Meta_Double_Params_Defaults()
+      : StgParams(::Meta_Double_SignalOpenMethod, ::Meta_Double_SignalOpenFilterMethod, ::Meta_Double_SignalOpenLevel,
+                  ::Meta_Double_SignalOpenBoostMethod, ::Meta_Double_SignalCloseMethod, ::Meta_Double_SignalCloseFilter,
+                  ::Meta_Double_SignalCloseLevel, ::Meta_Double_PriceStopMethod, ::Meta_Double_PriceStopLevel,
+                  ::Meta_Double_TickFilterMethod, ::Meta_Double_MaxSpread, ::Meta_Double_Shift) {
+    Set(STRAT_PARAM_LS, Meta_Double_LotSize);
+    Set(STRAT_PARAM_OCL, Meta_Double_OrderCloseLoss);
+    Set(STRAT_PARAM_OCP, Meta_Double_OrderCloseProfit);
+    Set(STRAT_PARAM_OCT, Meta_Double_OrderCloseTime);
+    Set(STRAT_PARAM_SOFT, Meta_Double_SignalOpenFilterTime);
   }
 };
 
-class Stg_Meta_Reversal : public Strategy {
+class Stg_Meta_Double : public Strategy {
  protected:
   Ref<Strategy> strat;
 
  public:
-  Stg_Meta_Reversal(StgParams &_sparams, TradeParams &_tparams, ChartParams &_cparams, string _name = "")
+  Stg_Meta_Double(StgParams &_sparams, TradeParams &_tparams, ChartParams &_cparams, string _name = "")
       : Strategy(_sparams, _tparams, _cparams, _name) {}
 
-  static Stg_Meta_Reversal *Init(ENUM_TIMEFRAMES _tf = NULL, EA *_ea = NULL) {
+  static Stg_Meta_Double *Init(ENUM_TIMEFRAMES _tf = NULL, EA *_ea = NULL) {
     // Initialize strategy initial values.
-    Stg_Meta_Reversal_Params_Defaults stg_reversal_defaults;
-    StgParams _stg_params(stg_reversal_defaults);
+    Stg_Meta_Double_Params_Defaults stg_double_defaults;
+    StgParams _stg_params(stg_double_defaults);
     // Initialize Strategy instance.
     ChartParams _cparams(_tf, _Symbol);
     TradeParams _tparams;
-    Strategy *_strat = new Stg_Meta_Reversal(_stg_params, _tparams, _cparams, "(Meta) Reversal");
+    Strategy *_strat = new Stg_Meta_Double(_stg_params, _tparams, _cparams, "(Meta) Double");
     return _strat;
   }
 
   /**
    * Event on strategy's init.
    */
-  void OnInit() { SetStrategy(Meta_Reversal_Strategy); }
+  void OnInit() { SetStrategy(Meta_Double_Strategy); }
 
   /**
    * Sets strategy.
@@ -308,4 +307,4 @@ class Stg_Meta_Reversal : public Strategy {
   }
 };
 
-#endif  // STG_META_REVERSAL_MQH
+#endif  // STG_META_DOUBLE_MQH

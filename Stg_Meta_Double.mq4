@@ -6,7 +6,7 @@
 
 /**
  * @file
- * Implements Reversal meta strategy.
+ * Implements Double meta strategy.
  */
 
 // Includes the main code.
