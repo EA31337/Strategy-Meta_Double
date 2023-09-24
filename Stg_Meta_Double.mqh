@@ -9,7 +9,8 @@
 
 // User input params.
 INPUT2_GROUP("Meta Double strategy: main params");
-INPUT2 ENUM_STRATEGY Meta_Double_Strategy = STRAT_ATR;  // Strategy
+INPUT2 ENUM_STRATEGY Meta_Double_Strategy1 = STRAT_ATR;  // Strategy 1
+INPUT2 ENUM_STRATEGY Meta_Double_Strategy2 = STRAT_ATR;  // Strategy 2
 INPUT2_GROUP("Meta Double strategy: common params");
 INPUT2 float Meta_Double_LotSize = 0;                // Lot size
 INPUT2 int Meta_Double_SignalOpenMethod = 0;         // Signal open method
@@ -48,7 +49,7 @@ struct Stg_Meta_Double_Params_Defaults : StgParams {
 
 class Stg_Meta_Double : public Strategy {
  protected:
-  Ref<Strategy> strat;
+  DictStruct<long, Ref<Strategy>> strats;
 
  public:
   Stg_Meta_Double(StgParams &_sparams, TradeParams &_tparams, ChartParams &_cparams, string _name = "")
@@ -68,12 +69,15 @@ class Stg_Meta_Double : public Strategy {
   /**
    * Event on strategy's init.
    */
-  void OnInit() { SetStrategy(Meta_Double_Strategy); }
+  void OnInit() {
+    StrategyAdd(Meta_Double_Strategy1);
+    StrategyAdd(Meta_Double_Strategy2);
+  }
 
   /**
    * Sets strategy.
    */
-  bool SetStrategy(ENUM_STRATEGY _sid) {
+  bool StrategyAdd(ENUM_STRATEGY _sid) {
     bool _result = true;
     long _magic_no = Get<long>(STRAT_PARAM_ID);
     ENUM_TIMEFRAMES _tf = Get<ENUM_TIMEFRAMES>(STRAT_PARAM_TF);
@@ -270,7 +274,7 @@ class Stg_Meta_Double : public Strategy {
     _strat.Ptr().Set<ENUM_TIMEFRAMES>(STRAT_PARAM_TF, _tf);
     _strat.Ptr().Set<int>(STRAT_PARAM_TYPE, _type);
     _strat.Ptr().OnInit();
-    strat = _strat;
+    strats.Push(_strat);
     return _result;
   }
 
@@ -278,15 +282,14 @@ class Stg_Meta_Double : public Strategy {
    * Check strategy's opening signal.
    */
   bool SignalOpen(ENUM_ORDER_TYPE _cmd, int _method, float _level = 0.0f, int _shift = 0) {
-    bool _result = false;
-    if (!strat.IsSet()) {
-      // Returns false when strategy is not set.
-      return _result;
+    bool _result = strats.Size() > 0;
+    for (DictStructIterator<long, Ref<Strategy>> iter = strats.Begin(); iter.IsValid(); ++iter) {
+      Strategy *_strat = iter.Value().Ptr();
+      _level = _level == 0.0f ? _strat.Get<float>(STRAT_PARAM_SOL) : _level;
+      _method = _method == 0 ? _strat.Get<int>(STRAT_PARAM_SOM) : _method;
+      _shift = _shift == 0 ? _strat.Get<int>(STRAT_PARAM_SHIFT) : _shift;
+      _result &= _strat.SignalOpen(_cmd, _method, _level, _shift);
     }
-    _level = _level == 0.0f ? strat.Ptr().Get<float>(STRAT_PARAM_SOL) : _level;
-    _method = _method == 0 ? strat.Ptr().Get<int>(STRAT_PARAM_SOM) : _method;
-    _shift = _shift == 0 ? strat.Ptr().Get<int>(STRAT_PARAM_SHIFT) : _shift;
-    _result |= strat.Ptr().SignalOpen(Order::NegateOrderType(_cmd), _method, _level, _shift);
     return _result;
   }
 
@@ -294,15 +297,14 @@ class Stg_Meta_Double : public Strategy {
    * Check strategy's closing signal.
    */
   bool SignalClose(ENUM_ORDER_TYPE _cmd, int _method, float _level = 0.0f, int _shift = 0) {
-    bool _result = false;
-    if (!strat.IsSet()) {
-      // Returns false when strategy is not set.
-      return _result;
+    bool _result = strats.Size() > 0;
+    for (DictStructIterator<long, Ref<Strategy>> iter = strats.Begin(); iter.IsValid(); ++iter) {
+      Strategy *_strat = iter.Value().Ptr();
+      _level = _level == 0.0f ? _strat.Get<float>(STRAT_PARAM_SOL) : _level;
+      _method = _method == 0 ? _strat.Get<int>(STRAT_PARAM_SOM) : _method;
+      _shift = _shift == 0 ? _strat.Get<int>(STRAT_PARAM_SHIFT) : _shift;
+      _result &= _strat.SignalOpen(Order::NegateOrderType(_cmd), _method, _level, _shift);
     }
-    _level = _level == 0.0f ? strat.Ptr().Get<float>(STRAT_PARAM_SCL) : _level;
-    _method = _method == 0 ? strat.Ptr().Get<int>(STRAT_PARAM_SCM) : _method;
-    _shift = _shift == 0 ? strat.Ptr().Get<int>(STRAT_PARAM_SHIFT) : _shift;
-    _result |= strat.Ptr().SignalClose(Order::NegateOrderType(_cmd), _method, _level, _shift);
     return _result;
   }
 };
