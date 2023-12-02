@@ -9,8 +9,8 @@
 
 // User input params.
 INPUT2_GROUP("Meta Double strategy: main params");
-INPUT2 ENUM_STRATEGY Meta_Double_Strategy1 = STRAT_DEMARKER;   // Strategy 1
-INPUT2 ENUM_STRATEGY Meta_Double_Strategy2 = STRAT_INDICATOR;  // Strategy 2
+INPUT2 ENUM_STRATEGY Meta_Double_Strategy1 = STRAT_OSCILLATOR;        // Strategy 1
+INPUT2 ENUM_STRATEGY Meta_Double_Strategy2 = STRAT_OSCILLATOR_TREND;  // Strategy 2
 INPUT3_GROUP("Meta Double strategy: common params");
 INPUT3 float Meta_Double_LotSize = 0;                // Lot size
 INPUT3 int Meta_Double_SignalOpenMethod = 0;         // Signal open method
